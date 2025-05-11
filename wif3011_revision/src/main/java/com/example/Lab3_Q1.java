@@ -15,17 +15,22 @@ package com.example;
 import java.util.concurrent.Semaphore;
 
 public class Lab3_Q1 {
-    
-}
+    private static final int max_guest = 6;
+    private static final Semaphore guestSemaphore = new Semaphore (max_guest);
+    private static final Object cleanerLock = new Object();
+    private static int cleanerCount = 0;
+    private static int guestCount = 0;
 
-class Cleaner implements Runnable{
-    String name; 
-    
-    public Cleaner(String name){
-        this.name = name;
-    }
+    static class Cleaner implements Runnable {
+        private final String name;
+        
+        public Cleaner(String name){
+            this.name = name;
+        }
 
-    public void run(){
-
+        @Override
+        public void run() {
+            
+        }
     }
 }
