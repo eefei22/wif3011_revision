@@ -1,4 +1,4 @@
-# Java Concurrent Programming Cheatsheet
+# Java Concurrent Programming Cheatsheet (Complete)
 
 ## Thread Basics
 
@@ -10,43 +10,54 @@ Thread t = new Thread(() -> {
 t.start();
 ```
 
-### Extending `Thread` vs Implementing `Runnable`
-- **`Thread`**: Subclass when thread has its own behavior.
-- **`Runnable`**: Preferred; allows sharing among threads.
-
+### Runnable Interface
 ```java
-class MyRunnable implements Runnable {
+public class MyRunnable implements Runnable {
     public void run() {
         System.out.println("Runnable running");
+    }
+    public static void main(String[] args) {
+        MyRunnable run1 = new MyRunnable();
+        Thread thread1 = new Thread(run1);
+        thread1.start();
     }
 }
 ```
 
-## Thread Lifecycle
+### Thread Methods Summary
 
-**States**: `New → Runnable → Running → Blocked/Waiting → Terminated`
+| Method         | Description                                      |
+|----------------|--------------------------------------------------|
+| `start()`      | Starts the thread, invokes `run()` internally   |
+| `run()`        | Entry point of thread logic                      |
+| `sleep(ms)`    | Pauses thread for duration                      |
+| `join()`       | Waits for thread to complete                     |
+| `yield()`      | Hints that thread is willing to yield CPU       |
+| `interrupt()`  | Interrupts sleeping/waiting thread              |
+| `isAlive()`    | Checks if thread is still running                |
+| `setName()`    | Names a thread                                   |
+| `setPriority()`| Sets thread priority (1–10)                     |
 
-### Key Methods:
-- `start()` – Begins thread.
-- `run()` – Code inside this is executed.
-- `sleep(ms)` – Pauses thread.
-- `join()` – Waits for thread to finish.
-- `interrupt()` – Interrupts a sleeping/waiting thread.
+## Atomic Operations
 
+### Example: `AtomicInteger`
+```java
+AtomicInteger counter = new AtomicInteger();
+counter.incrementAndGet(); // atomic +1
+counter.getAndAdd(5);      // atomic +5
+counter.compareAndSet(10, 15); // conditional update
+```
 
-## Synchronization and Locks
+## Synchronization & Locks
 
-### `synchronized` Keyword
+### Synchronized Block
 ```java
 synchronized(lockObject) {
-    // critical section
+    // only one thread at a time
 }
 ```
 
-- Prevents race conditions.
-- Ensures only one thread can access the block.
-
-### `ReentrantLock`
+### ReentrantLock
 ```java
 Lock lock = new ReentrantLock();
 lock.lock();
@@ -56,81 +67,104 @@ try {
     lock.unlock();
 }
 ```
-- More flexible than `synchronized`.
-- Allows tryLock(), fair locking.
 
-## Common Concurrency Issues
-
-| Problem | Description |
-|--------|-------------|
-| Race Condition | Two threads modify shared data unpredictably |
-| Deadlock | Two+ threads wait forever for each other's lock |
-| Starvation | A thread never gets CPU/lock time |
-| Livelock | Threads continuously react to each other without progressing |
-
+### ReentrantReadWriteLock
+```java
+ReadWriteLock rwLock = new ReentrantReadWriteLock();
+rwLock.readLock().lock();
+rwLock.readLock().unlock();
+rwLock.writeLock().lock();
+rwLock.writeLock().unlock();
+```
 
 ## Thread Coordination
 
-### `wait()` / `notify()` / `notifyAll()`
+### wait(), notify(), notifyAll()
 ```java
-synchronized(obj) {
-    while (conditionNotMet) {
-        obj.wait(); // releases lock
+synchronized (lock) {
+    while (!condition) {
+        lock.wait();  // must own the lock
     }
-    // condition met
-    obj.notify(); // wakes one waiting thread
+    // ...
+    lock.notify(); // or notifyAll()
 }
 ```
 
-## Atomic Operations
+## Thread Lifecycle Example
 
-### `AtomicInteger`
 ```java
-AtomicInteger counter = new AtomicInteger();
-counter.incrementAndGet(); // atomic +1
-counter.getAndAdd(5);      // atomic +5
+Thread waitingThread = new Thread(() -> {
+    synchronized(lock) {
+        lock.wait();
+    }
+});
+Thread notifierThread = new Thread(() -> {
+    synchronized(lock) {
+        lock.notify();
+    }
+});
 ```
-- Avoids `synchronized` overhead for counters.
 
-## Executor Framework
+## Volatile Keyword
 
-### Thread Pool with Executors
+```java
+private static volatile boolean flag = false;
+```
+- Ensures visibility across threads
+- Prevents caching of variable value
+
+## Deadlocks
+
+### Classic Deadlock
+```java
+synchronized(lock1) {
+    synchronized(lock2) { ... }
+}
+```
+
+### Avoiding Deadlock
+- Timeout (`tryLock`)
+- Lock ordering
+- `Concurrent` package utilities
+
+## Executors
+
+### Fixed Thread Pool
 ```java
 ExecutorService service = Executors.newFixedThreadPool(5);
-service.execute(() -> {
-    // task
-});
+service.execute(() -> { ... });
 service.shutdown();
 ```
 
-### Scheduled Executor
+### Scheduled Tasks
 ```java
 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 scheduler.scheduleAtFixedRate(task, 0, 10, TimeUnit.SECONDS);
 ```
 
-## 🔁 Producer-Consumer using Semaphore
-```java
-Semaphore sem = new Semaphore(1); // permits
-sem.acquire(); // wait for permit
-// critical section
-sem.release(); // give back permit
-```
+## Concurrent Collections
 
-## Programmer Thought Process
+- `ConcurrentHashMap`
+- `CopyOnWriteArrayList`
+- `BlockingQueue`, `PriorityBlockingQueue`
+- `ConcurrentLinkedQueue`, `ConcurrentSkipListMap`
 
-1. **Problem Statement → Thread Roles**
-   - Ex: Guest, Cleaner, Controller, QueueMonitor.
+## Sample Use Cases
 
-2. **Shared Resources? → Locks/Semaphores**
-   - Synchronize only the minimum necessary block.
+### Cleaner-Guest Problem
+- Use `Semaphore` and `wait()/notifyAll()` to manage access and cleaning.
 
-3. **Do I Need Mutual Exclusion?**
-   - Use `synchronized`, `ReentrantLock`, or atomic types.
+### Alternating Even-Odd Printer
+- Use shared lock and `wait()/notify()` to switch turns.
 
-4. **Thread Safety or Performance?**
-   - Use `ExecutorService` or thread-safe collections (`ConcurrentHashMap`, `BlockingQueue`).
+## Strategy Guide
 
-5. **Test & Debug Concurrently**
-   - Add `Thread.sleep()` to simulate real time.
-   - Use `Thread.currentThread().getName()` for logs.
+| Situation                                   | Use This                         | Benefit                              |
+|--------------------------------------------|----------------------------------|--------------------------------------|
+| Need mutual exclusion                      | `synchronized`, `ReentrantLock`  | Avoid race conditions                |
+| One thread waits for another               | `wait()/notify()`, `CountDownLatch` | Synchronize timing               |
+| Timeout-based locking                      | `tryLock(timeout)`               | Prevent deadlock                     |
+| Shared counters                            | `AtomicInteger`                  | Avoid full locks                     |
+| Thread management                          | `ExecutorService`                | Simplify thread lifecycle            |
+| Shared collection with many readers/writers| `ConcurrentHashMap`, `CopyOnWriteArrayList` | Thread-safe data access     |
+
