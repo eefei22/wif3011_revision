@@ -1,6 +1,6 @@
-# 🧵 Java Concurrent Programming Cheatsheet
+# Java Concurrent Programming Cheatsheet
 
-## ✅ Thread Basics
+## Thread Basics
 
 ### Creating a Thread
 ```java
@@ -22,9 +22,7 @@ class MyRunnable implements Runnable {
 }
 ```
 
----
-
-## 🕹️ Thread Lifecycle
+## Thread Lifecycle
 
 **States**: `New → Runnable → Running → Blocked/Waiting → Terminated`
 
@@ -35,9 +33,8 @@ class MyRunnable implements Runnable {
 - `join()` – Waits for thread to finish.
 - `interrupt()` – Interrupts a sleeping/waiting thread.
 
----
 
-## 🔐 Synchronization and Locks
+## Synchronization and Locks
 
 ### `synchronized` Keyword
 ```java
@@ -62,9 +59,7 @@ try {
 - More flexible than `synchronized`.
 - Allows tryLock(), fair locking.
 
----
-
-## ⚠️ Common Concurrency Issues
+## Common Concurrency Issues
 
 | Problem | Description |
 |--------|-------------|
@@ -73,9 +68,8 @@ try {
 | Starvation | A thread never gets CPU/lock time |
 | Livelock | Threads continuously react to each other without progressing |
 
----
 
-## 🚦 Thread Coordination
+## Thread Coordination
 
 ### `wait()` / `notify()` / `notifyAll()`
 ```java
@@ -88,9 +82,7 @@ synchronized(obj) {
 }
 ```
 
----
-
-## 🧮 Atomic Operations
+## Atomic Operations
 
 ### `AtomicInteger`
 ```java
@@ -100,9 +92,7 @@ counter.getAndAdd(5);      // atomic +5
 ```
 - Avoids `synchronized` overhead for counters.
 
----
-
-## 🧰 Executor Framework
+## Executor Framework
 
 ### Thread Pool with Executors
 ```java
@@ -119,8 +109,6 @@ ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 scheduler.scheduleAtFixedRate(task, 0, 10, TimeUnit.SECONDS);
 ```
 
----
-
 ## 🔁 Producer-Consumer using Semaphore
 ```java
 Semaphore sem = new Semaphore(1); // permits
@@ -129,27 +117,7 @@ sem.acquire(); // wait for permit
 sem.release(); // give back permit
 ```
 
----
-
-## 🧪 Practical Examples
-
-### 1. Cleaner-Guest Problem (Semaphore + Lock)
-- Guests use `Semaphore` to limit room access.
-- Cleaners wait until all guests leave using `wait()/notifyAll()`.
-
-### 2. Bank Queue Simulation
-- Use `ArrayList` as queue.
-- Three threads simulate customer arrival, serving queue, and queue checking.
-- Use `sleep(random)` and non-blocking loops.
-
-### 3. Counter Stopper
-- One thread increments counter.
-- Another monitors and exits at 5000.
-- Use `volatile int counter` for visibility.
-
----
-
-## 🧠 Programmer Thought Process
+## Programmer Thought Process
 
 1. **Problem Statement → Thread Roles**
    - Ex: Guest, Cleaner, Controller, QueueMonitor.
