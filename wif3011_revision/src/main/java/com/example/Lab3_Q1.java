@@ -30,7 +30,63 @@ public class Lab3_Q1 {
 
         @Override
         public void run() {
-            
+            try {
+                synchronized (cleanerLock){
+                    while (guestCount > 0){
+                        System.out.println("guests are in the room, " + name + " will wait");
+                        cleanerLock.wait();
+                    }
+                    cleanerCount++;
+                    System.out.println(name + " entered the room for cleaning");
+                }
+                Thread.sleep(2000);
+
+                synchronized (cleanerLock){
+                    cleanerCount --;
+                    System.out.println(name + " finished cleaning and left the room");
+                    cleanerLock.notifyAll();
+                }
+            } catch (InterruptedException e){Thread.currentThread().interrupt();}
+        }
+    }
+
+    static class Guest implements Runnable{
+        private final String name;
+
+        public Guest(String name) {
+            this.name = name;
+        }
+        @Override
+        public void run(){
+            try {
+                guestSemaphore.acquire();
+                synchronized (cleanerLock){
+                    while (cleanerCount>0){
+                        System.out.println("cleaners are in the room " + name + " will wait");
+                        cleanerLock.wait();
+                    }
+                    guestCount++;
+                    System.out.println(name + " entered the room. Current guests: " + guestCount);
+                }
+                Thread.sleep(1000);
+
+                synchronized (cleanerLock){
+                    guestCount--;
+                    System.out.println(name + " left the room. Current guests: " + guestCount);
+                    if (guestCount == 0){
+                        cleanerLock.notifyAll();
+                    }
+                }
+                guestSemaphore.release();
+            } catch (InterruptedException e){Thread.currentThread();}
+        }
+    }
+    public static void main(String[] args){
+        for (int i=1; i<=3; i++){
+            new Thread(new Cleaner("Cleaner " + i)).start();
+        }
+        for (int i=1; i<11; i++){
+            new Thread(new Guest("Guest " + i)).start();
         }
     }
 }
