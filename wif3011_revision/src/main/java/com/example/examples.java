@@ -1,92 +1,84 @@
-package com.example;
-import java.util.concurrent.Semaphore;
 
-public class examples {
-    private static final int MAX_GUESTS = 6;
-    private static final Semaphore guestSemaphore = new Semaphore(MAX_GUESTS);
-    private static final Object cleanerLock = new Object();
-    private static int cleanerCount = 0;
-    private static int guestCount = 0;
+import java.util.Random;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-    static class Cleaner implements Runnable {
-        private final String name;
+class Node<T> {
+    private T value;
+    private final Lock lock = new ReentrantLock();
+    private final Condition valueChanged = lock.newCondition();
 
-        public Cleaner(String name) {
-            this.name = name;
+    public void setValue(T newValue) {
+        lock.lock();
+        try {
+            value = newValue;
+            valueChanged.signalAll();
+        } finally {
+            lock.unlock();
         }
-        @Override
-        public void run() {
-            try {
-                synchronized (cleanerLock) {
-                    while (guestCount > 0) {
-                        System.out.println(name + " is waiting because there are guests in the room");
-                        cleanerLock.wait();
-                    }
-                    cleanerCount++;
-                    System.out.println(name + " entered the room for cleaning");
-                }
-                // Simulate cleaning time
-                Thread.sleep(2000);
-
-                synchronized (cleanerLock) {
-                    cleanerCount--;
-                    System.out.println(name + " finished cleaning and left the room");
-                    cleanerLock.notifyAll();
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+    }
+    public void executeOnValue(T desiredValue, Runnable task) {
+        lock.lock();
+        try {
+            while (!desiredValue.equals(value)) {
+                valueChanged.await();
             }
+            task.run();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+
+//ReentrantReadWriteLock
+lock.readLock().lock();     // multiple threads can hold
+lock.writeLock().lock();    // exclusive access
+
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+public class ReentrantReadWriteLockExample {
+    private static final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
+    private static String sharedData = "Initial";
+
+    public static void readData(String readerName) {
+        rwLock.readLock().lock();
+        try {
+            System.out.println(readerName + " is reading: " + sharedData);
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            rwLock.readLock().unlock();
         }
     }
 
-    static class Guest implements Runnable {
-        private final String name;
-
-        public Guest(String name) {
-            this.name = name;
-        }
-        @Override
-        public void run() {
-            try {
-                // Try to acquire guest permit
-                guestSemaphore.acquire();
-
-                synchronized (cleanerLock) {
-                    while (cleanerCount > 0) {
-                        System.out.println(name + " is waiting because cleaners are in the room");
-                        cleanerLock.wait();
-                    }
-                    guestCount++;
-                    System.out.println(name + " entered the room. Current guests: " + guestCount);
-                }
-
-                // Simulate guest staying in the room
-                Thread.sleep(1000);
-
-                synchronized (cleanerLock) {
-                    guestCount--;
-                    System.out.println(name + " left the room. Current guests: " + guestCount);
-                    if (guestCount == 0) {
-                        cleanerLock.notifyAll();
-                    }
-                }
-
-                guestSemaphore.release();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+    public static void writeData(String newValue, String writerName) {
+        rwLock.writeLock().lock();
+        try {
+            System.out.println(writerName + " is writing: " + newValue);
+            Thread.sleep(1000);
+            sharedData = newValue;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            rwLock.writeLock().unlock();
         }
     }
 
     public static void main(String[] args) {
-        // Create and start cleaners
-        for (int i = 1; i <= 3; i++) {
-            new Thread(new Cleaner("Cleaner " + i)).start();
-        }
+        Runnable reader1 = () -> readData("Reader-1");
+        Runnable reader2 = () -> readData("Reader-2");
+        Runnable writer = () -> writeData("Updated", "Writer");
 
-        // Create and start guests
-        for (int i = 1; i <= 10; i++) {
-            new Thread(new Guest("Guest " + i)).start();
-        }
+        new Thread(reader1).start();
+        new Thread(reader2).start();
+        new Thread(writer).start();
     }
 }
+
+
+
+

@@ -1,170 +1,328 @@
-# Java Concurrent Programming Cheatsheet (Complete)
+# Java Concurrent Programming Examples
 
-## Thread Basics
+---
 
-### Creating a Thread
+## 🔤 Basic Thread and Runnable Implementation
+
 ```java
-Thread t = new Thread(() -> {
-    System.out.println("Running in thread");
-});
-t.start();
+class printChar implements Runnable {
+  private char character;
+
+  public printChar (char c){
+    character = c;
+  }
+
+  @Override
+  public void run() {
+    for (int i=0; i<10; i++){
+      System.out.println(character);
+    }
+  }
+}
+
+public class Lab1_Q1 {
+  public static void main (String args[]){
+    Runnable R1 = new printChar('A');
+    Runnable R2 = new printChar('V');
+    Thread t1 = new Thread(R1);
+    Thread t2 = new Thread(R2);
+    t1.start();
+    t2.start();
+  }
+}
 ```
 
-### Runnable Interface
+---
+
+## 🧵 Thread directly implements Runnable (Lambda Style)
+
 ```java
-public class MyRunnable implements Runnable {
-    public void run() {
-        System.out.println("Runnable running");
-    }
-    public static void main(String[] args) {
-        MyRunnable run1 = new MyRunnable();
-        Thread thread1 = new Thread(run1);
-        thread1.start();
+public class Lab2_Q2 {
+  public static void main (String args[]) throws InterruptedException {
+    Thread t2 = new Thread(() -> {
+      // code to execute
+    });
+    t2.start();
+    t2.join();
+  }
+}
+```
+
+---
+
+## 🔒 Synchronized Blocks
+
+```java
+import java.util.concurrent.Semaphore;
+
+public class Lab3_Q1 {
+    private static final Semaphore guestSemaphore = new Semaphore(#permits);
+    private static final Object lock = new Object();
+
+    static class Cleaner implements Runnable {
+        private final String name;
+
+        public Cleaner(String name){
+            this.name = name;
+        }
+
+        @Override
+        public void run() {
+            try {
+                synchronized (lock){
+                    while (condition to wait){
+                        //code to execute
+                        cleanerLock.wait();
+                    }
+                    //more code to execute
+                }
+                Thread.sleep(2000);
+                synchronized (lock){
+                    //code to execute
+                    cleanerLock.notifyAll();
+                }
+            } catch (InterruptedException e){
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 }
 ```
 
-### Thread Methods Summary
+---
 
-| Method         | Description                                      |
-|----------------|--------------------------------------------------|
-| `start()`      | Starts the thread, invokes `run()` internally   |
-| `run()`        | Entry point of thread logic                      |
-| `sleep(ms)`    | Pauses thread for duration                      |
-| `join()`       | Waits for thread to complete                     |
-| `yield()`      | Hints that thread is willing to yield CPU       |
-| `interrupt()`  | Interrupts sleeping/waiting thread              |
-| `isAlive()`    | Checks if thread is still running                |
-| `setName()`    | Names a thread                                   |
-| `setPriority()`| Sets thread priority (1–10)                     |
+## 🚦 Semaphores
 
-## Atomic Operations
-
-### Example: `AtomicInteger`
 ```java
-AtomicInteger counter = new AtomicInteger();
-counter.incrementAndGet(); // atomic +1
-counter.getAndAdd(5);      // atomic +5
-counter.compareAndSet(10, 15); // conditional update
-```
+static class Guest implements Runnable {
+  private final String name;
 
-## Synchronization & Locks
+  public Guest(String name) {
+    this.name = name;
+  }
 
-### Synchronized Block
-```java
-synchronized(lockObject) {
-    // only one thread at a time
+  @Override
+  public void run(){
+    try {
+      guestSemaphore.acquire();
+      synchronized (lock){
+        while (condition to wait){
+          cleanerLock.wait();
+        }
+      }
+      Thread.sleep(1000);
+      synchronized (lock){
+        if (guestCount == 0){
+          cleanerLock.notifyAll();
+        }
+      }
+      guestSemaphore.release();
+    } catch (InterruptedException e){
+      Thread.currentThread();
+    }
+  }
 }
 ```
 
-### ReentrantLock
+---
+
+## 🧮 Synchronized Methods
+
+```java
+public class Lab3_Q2 {
+  static class BankAccount {
+    private double balance;
+    public BankAccount(double initialBal){
+      this.balance = initialBal;
+    }
+
+    public synchronized void deposit(double amount){
+      // deposit logic
+    }
+
+    public synchronized void withdrawal(double amount){
+      // withdrawal logic
+    }
+  }
+
+  static class AccountUser implements Runnable {
+    private final BankAccount account;
+    private final boolean isDepositor;
+    private final double amount;
+
+    public AccountUser(BankAccount account, boolean isDepositor, double amount){
+      this.account = account;
+      this.isDepositor = isDepositor;
+      this.amount = amount;
+    }
+
+    @Override
+    public void run(){
+      if (isDepositor){
+        account.deposit(amount);
+      } else {
+        account.withdrawal(amount);
+      }
+    }
+  }
+}
+```
+
+---
+
+## 🧵 Creating Multiple Threads
+
+```java
+public static void main(String[] args){
+  for (int i=1; i<=3; i++){
+    new Thread(new Cleaner("name" + i)).start();
+  }
+
+  for (int i=1; i<11; i++){
+    new Thread(new Guest("name" + i)).start();
+  }
+}
+```
+
+or
+
+```java
+public static void main (String[] args){
+  Thread[] threads = new Thread[10];
+  for (int i=0; i<5; i++){
+    threads[i] = new Thread(new AccountUser(account, true , 50), "Thread Name " + (i+1));
+  }
+  for (int i=5; i<10; i++){
+    threads[i] = new Thread(new AccountUser(account, false, 20), "Thread Name " + (i-4));
+  }
+  for (Thread thread : threads){
+    thread.start();
+  }
+  for (Thread thread: threads){
+    try {
+      thread.join();
+    } catch (InterruptedException e){
+      Thread.currentThread().interrupt();
+    }
+  }
+}
+```
+
+---
+
+## 🔓 Explicit Locks & Conditions
+
+### Lock Interface
+
+- `lock()`, `unlock()`, `tryLock()`, `tryLock(time, unit)`, `lockInterruptibly()`
+
 ```java
 Lock lock = new ReentrantLock();
 lock.lock();
 try {
-    // critical section
+  // critical section
 } finally {
-    lock.unlock();
+  lock.unlock();
 }
 ```
 
-### ReentrantReadWriteLock
-```java
-ReadWriteLock rwLock = new ReentrantReadWriteLock();
-rwLock.readLock().lock();
-rwLock.readLock().unlock();
-rwLock.writeLock().lock();
-rwLock.writeLock().unlock();
-```
+### Condition Interface
 
-## Thread Coordination
-
-### wait(), notify(), notifyAll()
 ```java
-synchronized (lock) {
-    while (!condition) {
-        lock.wait();  // must own the lock
-    }
-    // ...
-    lock.notify(); // or notifyAll()
+Condition condition = lock.newCondition();
+lock.lock();
+try {
+  while (!someCondition) {
+    condition.await();
+  }
+  // work
+  condition.signal();
+} finally {
+  lock.unlock();
 }
 ```
 
-## Thread Lifecycle Example
+---
+
+## 🔁 ReentrantLock Example
 
 ```java
-Thread waitingThread = new Thread(() -> {
-    synchronized(lock) {
-        lock.wait();
+import java.util.concurrent.locks.ReentrantLock;
+
+public class ReentrantLockExample {
+  private static final ReentrantLock lock = new ReentrantLock();
+  private static int counter = 0;
+
+  public static void increment() {
+    lock.lock();
+    try {
+      counter++;
+      System.out.println(Thread.currentThread().getName() + " incremented counter to " + counter);
+    } finally {
+      lock.unlock();
     }
-});
-Thread notifierThread = new Thread(() -> {
-    synchronized(lock) {
-        lock.notify();
-    }
-});
-```
+  }
 
-## Volatile Keyword
+  public static void main(String[] args) {
+    Runnable task = () -> {
+      for (int i = 0; i < 3; i++) {
+        increment();
+      }
+    };
 
-```java
-private static volatile boolean flag = false;
-```
-- Ensures visibility across threads
-- Prevents caching of variable value
+    Thread t1 = new Thread(task, "Thread-A");
+    Thread t2 = new Thread(task, "Thread-B");
 
-## Deadlocks
-
-### Classic Deadlock
-```java
-synchronized(lock1) {
-    synchronized(lock2) { ... }
+    t1.start();
+    t2.start();
+  }
 }
 ```
 
-### Avoiding Deadlock
-- Timeout (`tryLock`)
-- Lock ordering
-- `Concurrent` package utilities
+---
 
-## Executors
+## 🔏 ReentrantReadWriteLock Example
 
-### Fixed Thread Pool
 ```java
-ExecutorService service = Executors.newFixedThreadPool(5);
-service.execute(() -> { ... });
-service.shutdown();
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+public class ReentrantReadWriteLockExample {
+  private static final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
+  private static String sharedData = "Initial";
+
+  public static void readData(String readerName) {
+    rwLock.readLock().lock();
+    try {
+      System.out.println(readerName + " is reading: " + sharedData);
+      Thread.sleep(500);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    } finally {
+      rwLock.readLock().unlock();
+    }
+  }
+
+  public static void writeData(String newValue, String writerName) {
+    rwLock.writeLock().lock();
+    try {
+      System.out.println(writerName + " is writing: " + newValue);
+      Thread.sleep(1000);
+      sharedData = newValue;
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    } finally {
+      rwLock.writeLock().unlock();
+    }
+  }
+
+  public static void main(String[] args) {
+    Runnable reader1 = () -> readData("Reader-1");
+    Runnable reader2 = () -> readData("Reader-2");
+    Runnable writer = () -> writeData("Updated", "Writer");
+
+    new Thread(reader1).start();
+    new Thread(reader2).start();
+    new Thread(writer).start();
+  }
+}
 ```
-
-### Scheduled Tasks
-```java
-ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-scheduler.scheduleAtFixedRate(task, 0, 10, TimeUnit.SECONDS);
-```
-
-## Concurrent Collections
-
-- `ConcurrentHashMap`
-- `CopyOnWriteArrayList`
-- `BlockingQueue`, `PriorityBlockingQueue`
-- `ConcurrentLinkedQueue`, `ConcurrentSkipListMap`
-
-## Sample Use Cases
-
-### Cleaner-Guest Problem
-- Use `Semaphore` and `wait()/notifyAll()` to manage access and cleaning.
-
-### Alternating Even-Odd Printer
-- Use shared lock and `wait()/notify()` to switch turns.
-
-## Strategy Guide
-
-| Situation                                   | Use This                         | Benefit                              |
-|--------------------------------------------|----------------------------------|--------------------------------------|
-| Need mutual exclusion                      | `synchronized`, `ReentrantLock`  | Avoid race conditions                |
-| One thread waits for another               | `wait()/notify()`, `CountDownLatch` | Synchronize timing               |
-| Timeout-based locking                      | `tryLock(timeout)`               | Prevent deadlock                     |
-| Shared counters                            | `AtomicInteger`                  | Avoid full locks                     |
-| Thread management                          | `ExecutorService`                | Simplify thread lifecycle            |
-| Shared collection with many readers/writers| `ConcurrentHashMap`, `CopyOnWriteArrayList` | Thread-safe data access     |
-
