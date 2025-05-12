@@ -1,41 +1,8 @@
-# Java Concurrent Programming Examples
+# Java Concurrent Programming Cheatsheet (Complete)
 
----
+## Thread Basics
 
-## 🔤 Basic Thread and Runnable Implementation
-
-```java
-class printChar implements Runnable {
-  private char character;
-
-  public printChar (char c){
-    character = c;
-  }
-
-  @Override
-  public void run() {
-    for (int i=0; i<10; i++){
-      System.out.println(character);
-    }
-  }
-}
-
-public class Lab1_Q1 {
-  public static void main (String args[]){
-    Runnable R1 = new printChar('A');
-    Runnable R2 = new printChar('V');
-    Thread t1 = new Thread(R1);
-    Thread t2 = new Thread(R2);
-    t1.start();
-    t2.start();
-  }
-}
-```
-
----
-
-## 🧵 Thread directly implements Runnable (Lambda Style)
-
+### Creating a Thread
 ```java
 public class Lab2_Q2 {
   public static void main (String args[]) throws InterruptedException {
