@@ -1,4 +1,4 @@
-# Java Concurrent Programming Cheatsheet (Complete)
+# Java Concurrent Programming Cheatsheet (Incomplete)
 
 ## Thread Basics
 
