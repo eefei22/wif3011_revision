@@ -1,8 +1,6 @@
 # Java Concurrent Programming Examples
 
----
-
-## 🔤 Basic Thread and Runnable Implementation
+## Basic Thread and Runnable Implementation
 
 ```java
 class printChar implements Runnable {
@@ -32,9 +30,7 @@ public class Lab1_Q1 {
 }
 ```
 
----
-
-## 🧵 Thread directly implements Runnable (Lambda Style)
+## Thread directly implements Runnable (Lambda Style)
 
 ```java
 public class Lab2_Q2 {
@@ -48,9 +44,7 @@ public class Lab2_Q2 {
 }
 ```
 
----
-
-## 🔒 Synchronized Blocks
+## Synchronized Blocks
 
 ```java
 import java.util.concurrent.Semaphore;
@@ -89,9 +83,7 @@ public class Lab3_Q1 {
 }
 ```
 
----
-
-## 🚦 Semaphores
+## Semaphores
 
 ```java
 static class Guest implements Runnable {
@@ -124,9 +116,7 @@ static class Guest implements Runnable {
 }
 ```
 
----
-
-## 🧮 Synchronized Methods
+## Synchronized Methods
 
 ```java
 public class Lab3_Q2 {
@@ -168,9 +158,7 @@ public class Lab3_Q2 {
 }
 ```
 
----
-
-## 🧵 Creating Multiple Threads
+## Creating Multiple Threads
 
 ```java
 public static void main(String[] args){
@@ -208,9 +196,7 @@ public static void main (String[] args){
 }
 ```
 
----
-
-## 🔓 Explicit Locks & Conditions
+## Explicit Locks & Conditions
 
 ### Lock Interface
 
@@ -242,9 +228,7 @@ try {
 }
 ```
 
----
-
-## 🔁 ReentrantLock Example
+## ReentrantLock Example
 
 ```java
 import java.util.concurrent.locks.ReentrantLock;
@@ -279,9 +263,7 @@ public class ReentrantLockExample {
 }
 ```
 
----
-
-## 🔏 ReentrantReadWriteLock Example
+## ReentrantReadWriteLock Example
 
 ```java
 import java.util.concurrent.locks.ReentrantReadWriteLock;
