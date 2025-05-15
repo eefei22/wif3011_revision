@@ -25,11 +25,60 @@ package com.example;
 import java.util.Random;
 import java.util.concurrent.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Practice1 {
 
     static class TicketCounter{
-        
+        private int availableTickets = 100;
+
+        public synchronized boolean buyTickets(int ticketsRequest){
+            if(availableTickets > ticketsRequest){
+                availableTickets -= ticketsRequest;
+                return true;
+            } else {
+                return false;
+            }
+        }
+        public int getRemainingTickets(){
+            return availableTickets;
+        }
     }
 
+    static class Customer implements Runnable{
+        private TicketCounter counter;
+        private String customerName;
+        private int ticketsRequest;
+
+        public Customer(TicketCounter counter, String customerName){
+            this.counter = counter;
+            this.customerName = customerName;
+            this.ticketsRequest = new Random().nextInt(5) + 1;
+        }
+        @Override
+        public void run(){
+            boolean success = counter.buyTickets(ticketsRequest);
+            synchronized(System.out){
+                System.out.println("Customer " + customerName + " -- Purchased " + ticketsRequest + " ticket");
+                System.out.println("Ticket Purchase: " + (success ? "Sucess" : "Failed (not enough tickets available)"));
+            }
+        }
+    }
+
+    public static void main (String[] args) throws InterruptedException{
+        TicketCounter counter = new TicketCounter();
+        List<Thread> threadList = new ArrayList<>();
+
+        for (int i=0; i<20; i++){
+            Runnable r = new Customer(counter, "Customer " +i);
+            Thread t = new Thread(r);
+            threadList.add(t);
+            t.start();
+        }
+        for (Thread t : threadList){
+            t.join();
+        }
+
+        System.out.println("Remaining Tickets: " + counter.getRemainingTickets());
+    }
 }
