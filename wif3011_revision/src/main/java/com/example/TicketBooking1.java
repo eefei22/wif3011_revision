@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Random;
 
-public class Mock_test3 {
+public class TicketBooking1 {
     static class TicketCounter {                                            //Shared object to keep track of ticket count
         private int availableTickets = 100;
 
