@@ -25,7 +25,6 @@ package com.example;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Random;
 
 public class TicketBooking1 {
     static class TicketCounter {                                            //Shared object to keep track of ticket count

@@ -11,7 +11,6 @@
 */
 
 package com.example;
-import java.util.Random;
 import java.util.concurrent.locks.*;
 
 class Node<T> {
