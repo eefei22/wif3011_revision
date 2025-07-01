@@ -43,7 +43,7 @@ class Worker implements Runnable{
         }
     }
 }
-public class Q3_ReentrantLock {
+public class P3_ReentrantLock {
     public static void main(String[] args) throws InterruptedException {
         ReentrantLock lock = new ReentrantLock();
         

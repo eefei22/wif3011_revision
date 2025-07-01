@@ -97,7 +97,7 @@ class Savage implements Runnable {
     }
 }
 
-public class SharedPotDining {
+public class P7_SharedPotDining {
     public static void main(String[] args) throws InterruptedException {
         int numSavages = 5;
         int potCapacity = 3;

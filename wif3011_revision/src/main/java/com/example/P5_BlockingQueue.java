@@ -3,7 +3,7 @@ package com.example;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class Q5_BlockingQueue {
+public class P5_BlockingQueue {
     public static void main(String[] args) throws InterruptedException {
         BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(4);
         int POISON = -1;

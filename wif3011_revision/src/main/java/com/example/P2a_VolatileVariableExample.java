@@ -2,7 +2,7 @@ package com.example;
 
 //not thread safe
 
-public class Q2a_VolatileVariableExample {
+public class P2a_VolatileVariableExample {
     private static volatile int counter = 0; 
 
     public static void main (String[] args) throws InterruptedException{

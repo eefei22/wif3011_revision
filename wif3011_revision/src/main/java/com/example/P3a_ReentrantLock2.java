@@ -6,7 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
             Attempt to acquire the lock with a timeout (e.g., 500 ms).
 */
 
-public class Q3a_ReentrantLock2 {
+public class P3a_ReentrantLock2 {
 
     static ReentrantLock lock = new ReentrantLock();
 

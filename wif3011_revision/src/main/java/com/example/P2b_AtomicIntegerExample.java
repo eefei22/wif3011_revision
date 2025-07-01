@@ -3,7 +3,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 // thread safe
 
-public class Q2b_AtomicIntegerExample {
+public class P2b_AtomicIntegerExample {
     private static AtomicInteger counter = new AtomicInteger(0);
 
     public static void main (String[] args) throws InterruptedException {

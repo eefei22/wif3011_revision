@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class TicketBooking2 {
+public class P0a_TicketBooking2 {
 static class TicketCounter {                                                                            //A shared ticket inventory, allows customers to try booking
         private final AtomicInteger availableTickets = new AtomicInteger(100);             //Shared counter with atomic thread-safe updates
         private final Object lock = new Object();                                                       //Synchronization Monitor for wait/notify control

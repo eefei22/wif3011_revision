@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class TicketBooking1 {
+public class P0_TicketBooking1 {
     static class TicketCounter {                                            //Shared object to keep track of ticket count
         private int availableTickets = 100;
 

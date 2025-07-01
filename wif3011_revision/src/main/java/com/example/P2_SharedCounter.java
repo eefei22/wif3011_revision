@@ -5,7 +5,7 @@ package com.example;
 // Prevents race condition.
 // Create a class with multiple threads incrementing a shared int counter 10,000 times each.
 
-public class Q2_SharedCounter {
+public class P2_SharedCounter {
     public static void main(String[] args) throws InterruptedException{
         Counter c1 = new Counter();
         Runnable task = () -> {

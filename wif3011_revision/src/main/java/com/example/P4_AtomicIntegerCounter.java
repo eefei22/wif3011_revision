@@ -21,7 +21,7 @@ class AtomicCounter{
     }
 }
 
-public class Q4_AtomicIntegerCounter {
+public class P4_AtomicIntegerCounter {
     public static void main (String[] args) throws InterruptedException {
         AtomicCounter counter = new AtomicCounter();
         Runnable task = () -> {

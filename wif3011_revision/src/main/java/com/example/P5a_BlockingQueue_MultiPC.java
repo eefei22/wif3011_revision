@@ -2,7 +2,7 @@ package com.example;
 
 import java.util.concurrent.*;
 
-public class Q5a_BlockingQueue_MultiPC {
+public class P5a_BlockingQueue_MultiPC {
     public static void main(String[] args) throws InterruptedException{
         BlockingQueue<Integer> queue = new ArrayBlockingQueue<>(10);
         int Num_Pro = 3, Num_Con = 4;

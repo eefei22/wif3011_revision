@@ -112,7 +112,7 @@ class Cook implements Runnable {
 }
 
 
-public class SharedPotDining2 {
+public class P7a_SharedPotDining2 {
     public static void main (String[] args) throws InterruptedException{
 
         int savages = 5;
