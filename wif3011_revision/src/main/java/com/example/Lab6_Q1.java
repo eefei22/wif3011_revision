@@ -36,6 +36,6 @@ class StackAccess {
 
 
 
-public class Lab6Q1 {
+public class Lab6_Q1 {
     
 }
